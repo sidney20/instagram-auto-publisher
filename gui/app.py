@@ -1437,8 +1437,26 @@ class App(ctk.CTk):
 
         ctk.set_appearance_mode("dark")
         self.title("Instagram Auto Publisher — Dashboard")
-        self.geometry("1200x920")
-        self.minsize(1080, 840)
+        scr_w = self.winfo_screenwidth()
+        scr_h = self.winfo_screenheight()
+        work_h = scr_h
+        try:
+            import ctypes
+
+            class _RECT(ctypes.Structure):
+                _fields_ = [("l", ctypes.c_long), ("t", ctypes.c_long),
+                            ("r", ctypes.c_long), ("b", ctypes.c_long)]
+
+            _rc = _RECT()
+            ctypes.windll.user32.SystemParametersInfoW(
+                0x0030, 0, ctypes.byref(_rc), 0)  # SPI_GETWORKAREA
+            work_h = _rc.b - _rc.t
+        except Exception:
+            pass
+        win_w = min(1200, scr_w - 20)
+        win_h = min(920, work_h - 40)
+        self.geometry(f"{win_w}x{win_h}+{(scr_w - win_w) // 2}+0")
+        self.minsize(min(1080, win_w), min(700, win_h))
         self.configure(fg_color=T.BG)
         self.protocol("WM_DELETE_WINDOW", self._on_close)
 
@@ -1448,9 +1466,9 @@ class App(ctk.CTk):
             try:
                 pil = Image.open(logo_path)
                 pil = pil.convert("RGBA")
-                pil = ImageOps.fit(pil, (140, 140), method=Image.Resampling.LANCZOS)
+                pil = ImageOps.fit(pil, (104, 104), method=Image.Resampling.LANCZOS)
                 self._logo_img = ctk.CTkImage(light_image=pil, dark_image=pil,
-                                               size=(140, 140))
+                                               size=(104, 104))
                 icon_pil = ImageOps.fit(Image.open(logo_path).convert("RGBA"),
                                         (64, 64), method=Image.Resampling.LANCZOS)
                 icon_pil.save(logo_path.parent / "icon.ico", format="ICO")
@@ -1486,7 +1504,7 @@ class App(ctk.CTk):
         bar.pack_propagate(False)
 
         head = ctk.CTkFrame(bar, fg_color="transparent")
-        head.pack(fill="x", padx=18, pady=(10, 6))
+        head.pack(fill="x", padx=18, pady=(6, 4))
         if self._logo_img:
             ctk.CTkLabel(head, image=self._logo_img, text="").pack(fill="x")
             ctk.CTkLabel(head, text="IG AUTO PUBLISHER", font=T.label_caps(10),
@@ -1504,7 +1522,7 @@ class App(ctk.CTk):
 
         prof_label = ctk.CTkLabel(bar, text="PERFIS", font=T.label_caps(10),
                                   text_color=T.MUTED, anchor="w")
-        prof_label.pack(fill="x", padx=22, pady=(8, 2))
+        prof_label.pack(fill="x", padx=22, pady=(4, 2))
 
         self.profile_btns: dict[int, ctk.CTkButton] = {}
         for i in (1, 2):
@@ -1518,7 +1536,7 @@ class App(ctk.CTk):
             self.profile_btns[i] = btn
 
         sep2 = ctk.CTkFrame(bar, fg_color=T.BORDER, height=1)
-        sep2.pack(fill="x", padx=14, pady=(12, 0))
+        sep2.pack(fill="x", padx=14, pady=(8, 0))
 
         self.start_btn = ctk.CTkButton(
             bar, text="▶   INICIAR PUBLICAÇÃO", height=46,
@@ -1527,12 +1545,12 @@ class App(ctk.CTk):
             corner_radius=10,
             command=self._start,
         )
-        self.start_btn.pack(fill="x", padx=16, pady=(10, 4))
+        self.start_btn.pack(fill="x", padx=16, pady=(6, 2))
 
         self.hint_lbl = ctk.CTkLabel(bar, text="", justify="left", anchor="w",
                                      font=T.body(11), wraplength=SIDEBAR_W - 44,
                                      text_color=T.MUTED)
-        self.hint_lbl.pack(fill="x", padx=20, pady=(0, 10))
+        self.hint_lbl.pack(fill="x", padx=20, pady=(0, 4))
 
         nav_items = [
             ("🏠   Dashboard", lambda: self.show_profile(self.current_profile_index)),
@@ -1550,6 +1568,14 @@ class App(ctk.CTk):
             )
             b.pack(fill="x", padx=14, pady=1)
 
+        self.update_btn = ctk.CTkButton(
+            bar, text="⟳   Buscar atualização", anchor="w", height=34,
+            font=T.body(13), fg_color="transparent", hover_color=T.SURF_HIGHEST,
+            text_color=T.MUTED, corner_radius=8,
+            command=self._check_update,
+        )
+        self.update_btn.pack(fill="x", padx=14, pady=1)
+
         footer_sep = ctk.CTkFrame(bar, fg_color=T.BORDER, height=1)
         footer_sep.pack(fill="x", padx=14, pady=(12, 6), side="bottom")
         exit_btn = ctk.CTkButton(
@@ -1559,14 +1585,6 @@ class App(ctk.CTk):
             command=self._on_close,
         )
         exit_btn.pack(fill="x", padx=14, pady=6, side="bottom")
-
-        self.update_btn = ctk.CTkButton(
-            bar, text="⟳   Buscar atualização", anchor="w", height=32,
-            font=T.body(12), fg_color="transparent", hover_color=T.SURF_HIGHEST,
-            text_color=T.MUTED, corner_radius=8,
-            command=self._check_update,
-        )
-        self.update_btn.pack(fill="x", padx=14, pady=(8, 2), side="bottom")
 
     def _check_update(self):
         if getattr(self, "_update_busy", False):
