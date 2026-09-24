@@ -58,7 +58,8 @@ try {
         Write-Host "Sem alteracoes novas para commitar."
     }
 
-    git push origin main 2>&1 | Out-Null
+    # sem redirect: stderr do git (progresso) nao pode virar erro do PS 5.1
+    git push origin main
     if ($LASTEXITCODE -ne 0) {
         Write-Host "ERRO: push falhou (confira git remote / autenticacao)" -ForegroundColor Red
         exit 1
