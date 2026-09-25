@@ -1,23 +1,13 @@
 @echo off
 chcp 65001 >nul
+cd /d "%~dp0"
 title Instagram Auto Publisher - Instalacao
-echo ============================================
-echo   INSTALACAO - Instagram Auto Publisher
-echo ============================================
-echo.
-echo Instalando dependencias (1a vez apenas)...
-echo.
 
-py -3 -m pip install -r requirements.txt
-if errorlevel 1 (
-    echo.
-    echo Falhou com "py -3", tentando "python"...
-    python -m pip install -r requirements.txt
-)
+call "%~dp0_bootstrap.bat"
+if errorlevel 1 ( pause & exit /b 1 )
 
 echo.
 echo ============================================
-echo  Pronto! Agora va em INICIAR.bat para abrir
-echo  o programa e faca login no Instagram.
+echo  Tudo instalado! Agora execute o INICIAR.bat
 echo ============================================
 pause

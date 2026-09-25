@@ -14,7 +14,17 @@ Você escolhe a pasta, escreve **uma única descrição** (usada em todos os ví
 - Python 3.11 ou superior
 - Google Chrome instalado (recomendado). Sem Chrome, o programa usa Microsoft Edge; sem ambos, instale o Chromium com `playwright install chromium`.
 
-## Instalação
+## Início rápido (recomendado)
+
+1. Descompacte o zip baixado (clique direito → **Extrair tudo**).
+2. Dê **duplo clique em `iniciar.bat`**.
+3. Na primeira vez ele detecta/instala o Python, as dependências e o navegador sozinho (leva 1 a 2 minutos e mostra o progresso) e então abre o programa. Nas próximas vezes abre direto.
+
+Se aparecer `[ERRO] Python nao encontrado`, instale o Python em <https://www.python.org/downloads/> marcando a opção **"Add python.exe to PATH"** e rode o `iniciar.bat` de novo.
+
+Não abra o `main.py` diretamente — sempre pelo `iniciar.bat`.
+
+## Instalação (manual, para desenvolvedores)
 
 ```bash
 cd instagram_auto_publisher
